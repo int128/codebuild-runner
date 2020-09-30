@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: codebuild-runner
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  GitHubWebhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: github_webhook
+      Runtime: go1.x
+      Events:
+        # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        GitHubWebhook:
+          Type: Api
+          Properties:
+            Path: /github
+            Method: POST
+  GitHubWebhookFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GitHubWebhookFunction}
+      RetentionInDays: 7
+  CodeBuildEventsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: codebuild_events
+      Runtime: go1.x
+      Events:
+        # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        CodeBuildEvents:
+          Type: SNS
+          Properties:
+            Topic: !Ref CodeBuildEvents
+  CodeBuildEventsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${CodeBuildEventsFunction}
+      RetentionInDays: 7
+  CodeBuildEvents:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: codebuild-runner
+  CodeBuildToSNS:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref CodeBuildEvents
+      # https://docs.aws.amazon.com/dtconsole/latest/userguide/set-up-sns.html
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: CodeBuildToSNS
+            Effect: Allow
+            Principal:
+              Service: ["codestar-notifications.amazonaws.com"]
+            Action: SNS:Publish
+            Resource: !Ref CodeBuildEvents
+
+Outputs:
+  GitHubWebhookURL:
+    Description: "Endpoint for GitHub Webhook"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/github"
