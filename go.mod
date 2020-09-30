@@ -8,4 +8,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v0.1.0
 	github.com/aws/aws-sdk-go-v2/service/codebuild v0.1.0
 	github.com/google/go-github/v32 v32.1.0
+	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 )

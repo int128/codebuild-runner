@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild"
+	"github.com/aws/aws-sdk-go-v2/service/codebuild/types"
 	"github.com/google/go-github/v32/github"
 	"github.com/int128/codebuild-runner/githubwebhook/builder"
 )
@@ -53,5 +54,17 @@ func calculateBuildInputForPushEvent(e github.PushEvent) *codebuild.StartBuildIn
 	return &codebuild.StartBuildInput{
 		ProjectName:   aws.String("codebuild-runner"),
 		SourceVersion: aws.String(sourceVersion),
+		EnvironmentVariablesOverride: []*types.EnvironmentVariable{
+			{
+				Name:  aws.String("GITHUB_WEBHOOK_HEADCOMMIT_ID"),
+				Value: e.HeadCommit.ID,
+				Type:  types.EnvironmentVariableTypePlaintext,
+			},
+			{
+				Name:  aws.String("GITHUB_WEBHOOK_REF"),
+				Value: e.Ref,
+				Type:  types.EnvironmentVariableTypePlaintext,
+			},
+		},
 	}
 }
