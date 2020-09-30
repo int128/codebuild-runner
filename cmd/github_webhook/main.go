@@ -18,7 +18,7 @@ func main() {
 
 func handle(ctx context.Context, r events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	if r.HTTPMethod == "POST" && r.Path == "/github" {
-		code, err := handler.HandleGitHubWebhook(ctx, r.MultiValueQueryStringParameters, r.Body)
+		code, err := handler.HandleGitHubWebhook(ctx, r.MultiValueQueryStringParameters, r.MultiValueHeaders, r.Body)
 		if err != nil {
 			log.Printf("error: %+v", err)
 			return events.APIGatewayProxyResponse{
