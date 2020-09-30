@@ -11,8 +11,11 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: github_webhook
+      Handler: codebuild-runner
       Runtime: go1.x
+      Environment:
+        Variables:
+          FUNCTION_NAME: GitHubWebhookFunction
       Events:
         GitHubWebhook:
           # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#httpapi
@@ -29,8 +32,11 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: codebuild_events
+      Handler: codebuild-runner
       Runtime: go1.x
+      Environment:
+        Variables:
+          FUNCTION_NAME: CodeBuildEventsFunction
       Events:
         CodeBuildEvents:
           Type: SNS

@@ -1,6 +1,5 @@
 .idea/
 
-/codebuild_events
-/github_webhook
+/codebuild-runner
 
 /packaged.yaml
