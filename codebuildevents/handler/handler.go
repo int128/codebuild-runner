@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
-func HandleCodeBuildSNSEvent(ctx context.Context, e events.SNSEvent) {
+func Handle(ctx context.Context, e events.SNSEvent) {
 	for _, record := range e.Records {
 		handleCodeBuildSNSEventRecord(ctx, record)
 	}

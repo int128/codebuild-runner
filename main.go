@@ -5,20 +5,23 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/int128/codebuild-runner/handler"
+	codebuildEventsHandler "github.com/int128/codebuild-runner/codebuildevents/handler"
+	gitHubWebhookHandler "github.com/int128/codebuild-runner/githubwebhook/handler"
 )
 
 func main() {
 	log.SetFlags(log.Lshortfile | log.Lmicroseconds)
 
-	functionName := os.Getenv("FUNCTION_NAME")
-	if functionName == "GitHubWebhookFunction" {
-		lambda.Start(handler.HandleGitHubWebhook)
+	// switch the role by ROLE environment variable to
+	// use single binary for multiple functions
+	role := os.Getenv("ROLE")
+	if role == "GitHubWebhookFunction" {
+		lambda.Start(gitHubWebhookHandler.Handle)
 		return
 	}
-	if functionName == "CodeBuildEventsFunction" {
-		lambda.Start(handler.HandleCodeBuildSNSEvent)
+	if role == "CodeBuildEventsFunction" {
+		lambda.Start(codebuildEventsHandler.Handle)
 		return
 	}
-	log.Fatalf("invalid FUNCTION_NAME: %s", functionName)
+	log.Fatalf("invalid ROLE=%s", role)
 }

@@ -1,4 +1,4 @@
-package webhook
+package usecases
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild"
 	"github.com/google/go-github/v32/github"
-	"github.com/int128/codebuild-runner/builder"
+	"github.com/int128/codebuild-runner/githubwebhook/builder"
 )
 
 func PushEvent(ctx context.Context, e github.PushEvent) error {
@@ -38,10 +38,5 @@ func PushEvent(ctx context.Context, e github.PushEvent) error {
 	}
 	log.Printf("build started %+v", buildOutput.Build)
 
-	return nil
-}
-
-func PullRequestEvent(_ context.Context, e github.PullRequestEvent) error {
-	log.Printf("payload=%+v", e)
 	return nil
 }

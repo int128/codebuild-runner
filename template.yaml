@@ -15,7 +15,7 @@ Resources:
       Runtime: go1.x
       Environment:
         Variables:
-          FUNCTION_NAME: GitHubWebhookFunction
+          ROLE: GitHubWebhookFunction
       Policies:
         - Statement:
             - Sid: StartBuild
@@ -43,7 +43,7 @@ Resources:
       Runtime: go1.x
       Environment:
         Variables:
-          FUNCTION_NAME: CodeBuildEventsFunction
+          ROLE: CodeBuildEventsFunction
       Events:
         CodeBuildEvents:
           Type: SNS
