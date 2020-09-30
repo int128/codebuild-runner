@@ -16,6 +16,13 @@ Resources:
       Environment:
         Variables:
           FUNCTION_NAME: GitHubWebhookFunction
+      Policies:
+        - Statement:
+            - Sid: StartBuild
+              Effect: Allow
+              Action:
+                - codebuild:StartBuild
+              Resource: '*'
       Events:
         GitHubWebhook:
           # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#httpapi
