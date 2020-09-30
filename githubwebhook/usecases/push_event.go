@@ -51,8 +51,7 @@ func calculateBuildInputForPushEvent(e github.PushEvent) *codebuild.StartBuildIn
 	//TODO: compute jobs from .codebuild/workflows/*.yaml
 
 	return &codebuild.StartBuildInput{
-		ProjectName:               aws.String("codebuild-runner"),
-		SourceVersion:             aws.String(sourceVersion),
-		ReportBuildStatusOverride: aws.Bool(true),
+		ProjectName:   aws.String("codebuild-runner"),
+		SourceVersion: aws.String(sourceVersion),
 	}
 }
