@@ -4,15 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
 
 	"github.com/google/go-github/v32/github"
 	"github.com/int128/codebuild-runner/webhook"
 )
 
-func HandleGitHubWebhook(ctx context.Context, _ url.Values, header http.Header, body string) (int, error) {
-	eventKind := header.Get("X-GitHub-Event")
+func HandleGitHubWebhook(ctx context.Context, header map[string]string, body string) (int, error) {
+	eventKind := header["x-github-event"]
 	if eventKind == "push" {
 		var e github.PushEvent
 		if err := json.Unmarshal([]byte(body), &e); err != nil {
@@ -33,5 +31,5 @@ func HandleGitHubWebhook(ctx context.Context, _ url.Values, header http.Header, 
 		}
 		return 200, nil
 	}
-	return 404, fmt.Errorf("unknown event `%s`", eventKind)
+	return 404, fmt.Errorf("unknown event `%s` in header %+v", eventKind, header)
 }

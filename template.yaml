@@ -14,9 +14,9 @@ Resources:
       Handler: github_webhook
       Runtime: go1.x
       Events:
-        # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
         GitHubWebhook:
-          Type: Api
+          # https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#httpapi
+          Type: HttpApi
           Properties:
             Path: /github
             Method: POST
@@ -32,7 +32,6 @@ Resources:
       Handler: codebuild_events
       Runtime: go1.x
       Events:
-        # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
         CodeBuildEvents:
           Type: SNS
           Properties:
@@ -61,8 +60,3 @@ Resources:
               Service: ["codestar-notifications.amazonaws.com"]
             Action: SNS:Publish
             Resource: !Ref CodeBuildEvents
-
-Outputs:
-  GitHubWebhookURL:
-    Description: "Endpoint for GitHub Webhook"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/github"
