@@ -16,6 +16,17 @@ func PushEvent(ctx context.Context, e github.PushEvent) error {
 		return fmt.Errorf("HeadCommit is nil")
 	}
 
+	buildInput := calculateBuildInputForPushEvent(e)
+	buildOutput, err := builder.Start(ctx, buildInput)
+	if err != nil {
+		return fmt.Errorf("could not start a build: %w", err)
+	}
+	log.Printf("build started %+v", buildOutput.Build)
+
+	return nil
+}
+
+func calculateBuildInputForPushEvent(e github.PushEvent) *codebuild.StartBuildInput {
 	changed := make(map[string]int)
 	for _, name := range e.HeadCommit.Added {
 		changed[name]++
@@ -26,17 +37,22 @@ func PushEvent(ctx context.Context, e github.PushEvent) error {
 	for _, name := range e.HeadCommit.Modified {
 		changed[name]++
 	}
-	log.Printf("changed=%+v", changed)
+	log.Printf("commit=%v, changed=%+v", e.HeadCommit.ID, changed)
+
+	// https://docs.aws.amazon.com/codebuild/latest/userguide/sample-source-version.html
+	// A tag (for example, refs/tags/mytagv1.0^{full-commit-SHA}).
+	// A branch (for example, refs/heads/mydevbranch^{full-commit-SHA}).
+	sourceVersion := e.HeadCommit.GetID()
+	ref := e.GetRef()
+	if ref != "" {
+		sourceVersion = fmt.Sprintf("%s^{%s}", ref, e.HeadCommit.GetID())
+	}
 
 	//TODO: compute jobs from .codebuild/workflows/*.yaml
 
-	buildOutput, err := builder.Start(ctx, &codebuild.StartBuildInput{
-		ProjectName: aws.String("codebuild-runner"),
-	})
-	if err != nil {
-		return fmt.Errorf("could not start a build: %w", err)
+	return &codebuild.StartBuildInput{
+		ProjectName:               aws.String("codebuild-runner"),
+		SourceVersion:             aws.String(sourceVersion),
+		ReportBuildStatusOverride: aws.Bool(true),
 	}
-	log.Printf("build started %+v", buildOutput.Build)
-
-	return nil
 }
