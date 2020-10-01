@@ -34,7 +34,7 @@ type commitStatus struct {
 }
 
 func calculateStatus(e codebuildevents.CodeBuildEvent) (*commitStatus, error) {
-	commitID := findEnvironmentVariable(e, "GITHUB_WEBHOOK_HEADCOMMIT_ID")
+	commitID := e.GetCommitSHA()
 	if commitID == "" {
 		return nil, fmt.Errorf("could not find the commit id")
 	}

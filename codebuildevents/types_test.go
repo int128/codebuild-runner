@@ -98,4 +98,9 @@ func Test_parseCodeBuildEvent(t *testing.T) {
 	if e.DetailType != events.CodeBuildPhaseChangeDetailType {
 		t.Errorf("DetailType wants `%s` but was `%s`", events.CodeBuildPhaseChangeDetailType, e.DetailType)
 	}
+	if e.Detail.AdditionalInformation.SourceVersion != "refs/heads/master^{75614758eace7c1d9d032b8980854ab486068f3b}" {
+		t.Errorf("SourceVersion wants %s but was %s",
+			"refs/heads/master^{75614758eace7c1d9d032b8980854ab486068f3b}",
+			e.Detail.AdditionalInformation.SourceVersion)
+	}
 }
