@@ -1,4 +1,4 @@
-package handler
+package codebuildevents
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func Test_parseCodeBuildEvent(t *testing.T) {
-	e, err := parseCodeBuildEvent(
+	e, err := ParseCodeBuildEvent(
 		// actual SNS message received via email
 		`{
   "account": "123456789012",

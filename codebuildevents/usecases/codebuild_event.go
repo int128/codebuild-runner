@@ -5,9 +5,10 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/int128/codebuild-runner/codebuildevents"
 )
 
-func CodeBuildEvent(ctx context.Context, e events.CodeBuildEvent) error {
+func CodeBuildEvent(ctx context.Context, e codebuildevents.CodeBuildEvent) error {
 	if e.DetailType == events.CodeBuildPhaseChangeDetailType {
 		return phaseChangeEvent(ctx, e)
 	}

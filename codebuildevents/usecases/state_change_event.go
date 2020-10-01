@@ -9,10 +9,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/google/go-github/v32/github"
+	"github.com/int128/codebuild-runner/codebuildevents"
 	"golang.org/x/oauth2"
 )
 
-func stateChangeEvent(ctx context.Context, e events.CodeBuildEvent) error {
+func stateChangeEvent(ctx context.Context, e codebuildevents.CodeBuildEvent) error {
 	s, err := calculateStatus(e)
 	if err != nil {
 		return fmt.Errorf("could not calculate the commit status: %w", err)
@@ -32,7 +33,7 @@ type commitStatus struct {
 	repoStatus github.RepoStatus
 }
 
-func calculateStatus(e events.CodeBuildEvent) (*commitStatus, error) {
+func calculateStatus(e codebuildevents.CodeBuildEvent) (*commitStatus, error) {
 	commitID := findEnvironmentVariable(e, "GITHUB_WEBHOOK_HEADCOMMIT_ID")
 	if commitID == "" {
 		return nil, fmt.Errorf("could not find the commit id")
@@ -51,7 +52,7 @@ func calculateStatus(e events.CodeBuildEvent) (*commitStatus, error) {
 		commit: commitID,
 		repoStatus: github.RepoStatus{
 			Context:     github.String("CodeBuild/example"),
-			State:       github.String(determineCommitStatus(e)),
+			State:       github.String(determineCommitStatus(e.Detail.BuildStatus)),
 			Description: github.String(string(e.Detail.BuildStatus)),
 			TargetURL:   github.String(codeBuildURL),
 		},
@@ -89,8 +90,8 @@ func parseGitHubURL(l string) (string, string, error) {
 	return e[0], e[1], nil
 }
 
-func determineCommitStatus(e events.CodeBuildEvent) string {
-	switch e.Detail.BuildStatus {
+func determineCommitStatus(codeBuildPhaseStatus events.CodeBuildPhaseStatus) string {
+	switch codeBuildPhaseStatus {
 	case events.CodeBuildPhaseStatusQueued:
 		return "pending"
 	case events.CodeBuildPhaseStatusInProgress:
