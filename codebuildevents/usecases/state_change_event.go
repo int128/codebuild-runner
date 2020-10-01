@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -38,7 +39,11 @@ func calculateStatus(e events.CodeBuildEvent) (*commitStatus, error) {
 	}
 	owner, repo, err := parseGitHubURL(e.Detail.AdditionalInformation.Source.Location)
 	if err != nil {
-		return nil, fmt.Errorf("could not find GitHub URL: %w", err)
+		return nil, fmt.Errorf("could not determine GitHub URL: %w", err)
+	}
+	codeBuildURL, err := computeCodeBuildURL(e.Detail.BuildID)
+	if err != nil {
+		return nil, fmt.Errorf("could not determine CodeBuild URL: %w", err)
 	}
 	return &commitStatus{
 		owner:  owner,
@@ -48,8 +53,28 @@ func calculateStatus(e events.CodeBuildEvent) (*commitStatus, error) {
 			Context:     github.String("CodeBuild/example"),
 			State:       github.String(determineCommitStatus(e)),
 			Description: github.String(string(e.Detail.BuildStatus)),
+			TargetURL:   github.String(codeBuildURL),
 		},
 	}, nil
+}
+
+// arn:aws:codebuild:REGION:ACCOUNT:build/PROJECT:BUILD
+var regexpBuildID = regexp.MustCompile(`^arn:aws:codebuild:(.+?):(.+?):build/(.+?):(.+?)$`)
+
+// https://REGION.console.aws.amazon.com/codesuite/codebuild/ACCOUNT/projects/PROJECT/build/PROJECT:BUILD/config?region=REGION
+func computeCodeBuildURL(buildID string) (string, error) {
+	m := regexpBuildID.FindStringSubmatch(buildID)
+	if m == nil {
+		return "", fmt.Errorf("invalid build-id `%s`", buildID)
+	}
+	return fmt.Sprintf("https://%s.console.aws.amazon.com/codesuite/codebuild/%s/projects/%s/build/%s:%s/config?region=%s",
+		m[1], // region
+		m[2], // account
+		m[3], // project
+		m[3], // project
+		m[4], // build
+		m[1], // region
+	), nil
 }
 
 func parseGitHubURL(l string) (string, string, error) {
