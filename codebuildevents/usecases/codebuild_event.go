@@ -12,7 +12,7 @@ func CodeBuildEvent(ctx context.Context, e events.CodeBuildEvent) error {
 		return phaseChangeEvent(ctx, e)
 	}
 	if e.DetailType == events.CodeBuildStateChangeDetailType {
-		return statusChangeEvent(ctx, e)
+		return stateChangeEvent(ctx, e)
 	}
 	return fmt.Errorf("unknown event detail type `%s`", e.DetailType)
 }
