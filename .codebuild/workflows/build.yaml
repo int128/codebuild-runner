@@ -1,10 +1,9 @@
 on:
   push:
     paths:
-      - .github/workflows/build.yaml
+      - .codebuild/workflows/build.yaml
       - '**.go'
 
 jobs:
   build:
-    runs-on: aws/codebuild/amazonlinux2-x86_64-standard:3.0
-
+    buildspec: /buildspec.yml
