@@ -38,6 +38,7 @@ func calculateStatus(e codebuildevents.CodeBuildEvent) (*commitStatus, error) {
 	if commitID == "" {
 		return nil, fmt.Errorf("could not find the commit id")
 	}
+	workflowName, jobName := e.GetEnvironmentVariable("RUNNER_WORKFLOW_NAME"), e.GetEnvironmentVariable("RUNNER_JOB_NAME")
 	owner, repo, err := parseGitHubURL(e.Detail.AdditionalInformation.Source.Location)
 	if err != nil {
 		return nil, fmt.Errorf("could not determine GitHub URL: %w", err)
@@ -51,7 +52,7 @@ func calculateStatus(e codebuildevents.CodeBuildEvent) (*commitStatus, error) {
 		repo:   repo,
 		commit: commitID,
 		repoStatus: github.RepoStatus{
-			Context:     github.String("CodeBuild/example"),
+			Context:     github.String(fmt.Sprintf("CodeBuild/%s/%s", workflowName, jobName)),
 			State:       github.String(determineCommitStatus(e.Detail.BuildStatus)),
 			Description: github.String(string(e.Detail.BuildStatus)),
 			TargetURL:   github.String(codeBuildURL),
